@@ -1,28 +1,21 @@
-// Fortune in a Pot — one kind, funny fortune for a houseplant.
-// Writes a single line (<=120 chars) to /output/entry.txt.
+// Fortune in a Pot — revised entry (Neon FINAL line, typed verbatim).
+// Writes the line verbatim to entry.txt in the grader's output dir —
+// $MAKEFUN_OUTPUT_DIR first, then /output, then ./output; no trailing newline.
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { join } from "node:path";
 
-const FORTUNE =
-  "This week a sunbeam will pick your favourite leaf, and you will grow a little taller just to say thank you.";
+const LINE = `Your next tiny leaf will win you the sunny sill, a whispered 'look at you,' and four blurry photos in the family chat.`;
 
-const MAX_CHARS = 120;
-const OUTPUT_PATH = "/output/entry.txt";
-
-if (FORTUNE.length < 1 || FORTUNE.length > MAX_CHARS) {
-  throw new Error(
-    `fortune must be 1-${MAX_CHARS} characters, got ${FORTUNE.length}`,
-  );
+const candidates = [process.env.MAKEFUN_OUTPUT_DIR, "/output", "./output"].filter(Boolean) as string[];
+let written = false;
+for (const dir of candidates) {
+  try {
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "entry.txt"), LINE, "utf8");
+    written = true;
+    break;
+  } catch {
+    // Directory not writable (e.g. read-only repo dir) — try the next fallback.
+  }
 }
-if (FORTUNE.includes("\n") || FORTUNE.trim() !== FORTUNE) {
-  throw new Error("fortune must be a single non-blank line");
-}
-// Keep the line pure ASCII so its byte length equals its char length
-// (the leaderboard tie-break counts bytes).
-if (!/^[\x20-\x7e]*$/.test(FORTUNE)) {
-  throw new Error("fortune must be plain ASCII text");
-}
-
-mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
-writeFileSync(OUTPUT_PATH, FORTUNE, "utf8");
-console.log(`wrote ${FORTUNE.length} chars to ${OUTPUT_PATH}`);
+if (!written) throw new Error("could not write entry.txt to any output dir");
