@@ -1,0 +1,1 @@
+{"name":"fortune-in-a-pot","private":true,"scripts":{"start":"bun main.ts"},"type":"module","version":"1.0.0"}
